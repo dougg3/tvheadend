@@ -187,8 +187,12 @@ gh_queue_delay(globalheaders_t *gh, int index)
 
   if (l->pr_pkt->pkt_dts != PTS_UNSET && f->pr_pkt->pkt_dts != PTS_UNSET) {
     diff = (l->pr_pkt->pkt_dts & PTS_MASK) - (f->pr_pkt->pkt_dts & PTS_MASK);
-    if (diff < 0)
+    if (diff < 0) {
       diff += PTS_MASK;
+      /* hack by Doug, this fixes immediate audio failure due to negative wrap */
+      if (diff > PTS_MASK/2)
+        diff = 0;
+    }
   } else {
     diff = 0;
   }
