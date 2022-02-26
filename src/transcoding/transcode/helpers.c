@@ -87,9 +87,8 @@ tvh_extradata_open(TVHContext *self, AVDictionary **opts)
 {
     size_t extradata_size = 0;
 
-    if (!(extradata_size = pktbuf_len(self->input_gh))) {
-        return AVERROR(EAGAIN);
-    }
+    extradata_size = pktbuf_len(self->input_gh);
+
     if (extradata_size >= TVH_INPUT_BUFFER_MAX_SIZE) {
         tvh_context_log(self, LOG_ERR, "extradata too big");
         return AVERROR(EOVERFLOW);
@@ -103,7 +102,9 @@ tvh_extradata_open(TVHContext *self, AVDictionary **opts)
         tvh_context_log(self, LOG_ERR, "failed to alloc extradata");
         return AVERROR(ENOMEM);
     }
-    memcpy(self->iavctx->extradata, pktbuf_ptr(self->input_gh), extradata_size);
+    if (extradata_size > 0) {
+        memcpy(self->iavctx->extradata, pktbuf_ptr(self->input_gh), extradata_size);
+    }
     self->iavctx->extradata_size = extradata_size;
     return 0;
 }
